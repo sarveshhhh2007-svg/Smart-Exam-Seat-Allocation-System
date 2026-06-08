@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SmartExam – Dashboard</title>
+  <meta name="description" content="SmartExam Exam Hall Seat Allocation – Admin Dashboard"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3>⚠️ Confirm Logout</h3>
+    <p>Are you sure you want to logout from SmartExam? You will need to login again to access the dashboard.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cancelLogout">Cancel</button>
+      <button class="btn btn-danger" id="doLogout">Yes, Logout</button>
+    </div>
+  </div>
+</div>
+
+<div class="app-shell">
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h2>SmartExam</h2>
+          <span>Seat Allocation System</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Main</div>
+        <div class="nav-item active" data-panel="dashboard">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Exam Management</div>
+        <div class="nav-item" data-panel="students">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          Add Students
+          <span class="nav-badge" id="badgeStudents">0</span>
+        </div>
+        <div class="nav-item" data-panel="allocate">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+          Allocate Seats
+          <span class="nav-badge" id="badgeAllocated">0</span>
+        </div>
+        <div class="nav-item" data-panel="collection">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Collection Sheet
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">System</div>
+        <div class="nav-item" data-panel="reset">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Reset Data
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-info">
+        <div class="admin-avatar" id="adminAvatar">A</div>
+        <div class="admin-details">
+          <div class="name" id="adminName">Admin</div>
+          <div class="role">Administrator</div>
+        </div>
+        <button class="logout-btn" id="logoutBtn" title="Logout">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 id="topTitle">Dashboard Overview</h1>
+        <p id="topSub">Manage your exam hall efficiently</p>
+      </div>
+      <div class="topbar-right">
+        <div class="stat-pill">
+          <span class="dot" style="background:var(--accent)"></span>
+          <span id="pillStudents">0 Students</span>
+        </div>
+        <div class="stat-pill">
+          <span class="dot" style="background:var(--success)"></span>
+          <span id="pillAllocated">0 Allocated</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+
+      <!-- ═══ DASHBOARD PANEL ═══ -->
+      <section class="panel active" id="dashboardPanel">
+        <div class="stats-grid">
+          <div class="stat-card" style="animation-delay:0ms">
+            <div class="stat-icon" style="background:#eff6ff">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#3498db"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="value" id="statStudents">0</div>
+              <div class="label">Total Students</div>
+            </div>
+          </div>
+          <div class="stat-card" style="animation-delay:80ms">
+            <div class="stat-icon" style="background:#f0fdf4">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#27ae60"><path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="value" id="statAllocated">0</div>
+              <div class="label">Seats Allocated</div>
+            </div>
+          </div>
+          <div class="stat-card" style="animation-delay:160ms">
+            <div class="stat-icon" style="background:#fdf4ff">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#8e44ad"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="value" id="statDepts">0</div>
+              <div class="label">Departments</div>
+            </div>
+          </div>
+          <div class="stat-card" style="animation-delay:240ms">
+            <div class="stat-icon" style="background:#fff7ed">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#f39c12"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="value" id="statSeats">—</div>
+              <div class="label">Last Allocation</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:24px">
+          <div class="card-header">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <h3>Quick Actions</h3>
+          </div>
+          <div class="card-body">
+            <div class="quick-actions">
+              <div class="action-card" data-go="students" style="animation-delay:0ms">
+                <div class="action-icon" style="background:#eff6ff">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#3498db"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </div>
+                <h4>Add Students</h4>
+                <p>Enter roll numbers and departments to build the student list.</p>
+              </div>
+              <div class="action-card" data-go="allocate" style="animation-delay:80ms">
+                <div class="action-icon" style="background:#f0fdf4">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#27ae60"><path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+                </div>
+                <h4>Allocate Seats</h4>
+                <p>Randomly shuffle and assign seats to prevent malpractice.</p>
+              </div>
+              <div class="action-card" data-go="collection" style="animation-delay:160ms">
+                <div class="action-icon" style="background:#fdf4ff">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#8e44ad"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <h4>Collection Sheet</h4>
+                <p>Generate a sorted reference list for administrative use.</p>
+              </div>
+              <div class="action-card" data-go="reset" style="animation-delay:240ms">
+                <div class="action-icon" style="background:#fff0f0">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#e74c3c"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                </div>
+                <h4>Reset Data</h4>
+                <p>Clear all student records and start a fresh exam session.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info banner -->
+        <div class="card" style="border-left:4px solid var(--accent)">
+          <div class="card-body" style="display:flex;align-items:center;gap:14px">
+            <div style="font-size:1.6rem">💡</div>
+            <div>
+              <strong style="color:var(--primary);font-size:.95rem">How SmartExam works</strong>
+              <p style="font-size:.83rem;color:var(--text-muted);margin-top:4px;max-width:640px">Add student roll numbers → Allocate seats using randomisation (Fisher-Yates shuffle) → Generate a sorted collection sheet for invigilators. Seating is randomised to prevent malpractice; the collection sheet is sorted by roll number for easy administration.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ STUDENTS PANEL ═══ -->
+      <section class="panel" id="studentsPanel">
+        <div class="section-header">
+          <h2>
+            <div class="icon-circle" style="background:#eff6ff">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#3498db"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+            Student Entry
+          </h2>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label for="csvFile" class="btn btn-secondary btn-sm" style="cursor:pointer">
+              📂 Import CSV
+            </label>
+            <input type="file" id="csvFile" accept=".csv" style="display:none"/>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+            <h3>Add New Student</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-control">
+                <label for="rollInput">Roll Number</label>
+                <input type="text" id="rollInput" placeholder="e.g. 22CS001" autocomplete="off"/>
+              </div>
+              <div class="form-control">
+                <label for="deptSelect">Department</label>
+                <select id="deptSelect">
+                  <option value="">— Select Department —</option>
+                  <option value="AIML">AIML – Artificial Intelligence &amp; ML</option>
+                  <option value="CSE">CSE – Computer Science</option>
+                  <option value="ECE">ECE – Electronics &amp; Communication</option>
+                  <option value="EEE">EEE – Electrical &amp; Electronics</option>
+                  <option value="MECH">MECH – Mechanical Engineering</option>
+                  <option value="CIVIL">CIVIL – Civil Engineering</option>
+                  <option value="IT">IT – Information Technology</option>
+                  <option value="MBA">MBA – Business Administration</option>
+                  <option value="MCA">MCA – Computer Applications</option>
+                </select>
+              </div>
+              <div>
+                <button class="btn btn-primary" id="addStudentBtn" style="width:100%;padding:11px 20px">
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M12 5v14m-7-7h14"/></svg>
+                  Add Student
+                </button>
+              </div>
+            </div>
+            <div class="validation-msg" id="addMsg"></div>
+            <div style="margin-top:12px;font-size:.78rem;color:var(--text-muted)">
+              💡 <strong>CSV Import format:</strong> Each row should be <code style="background:var(--bg);padding:1px 5px;border-radius:3px">ROLLNO,DEPT</code> — e.g. <code style="background:var(--bg);padding:1px 5px;border-radius:3px">22CS001,CSE</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--primary)" stroke-width="2"><path d="M9 12h6m-6 4h6M5 8h14M5 4h14"/></svg>
+              <h3>Student List</h3>
+            </div>
+            <span class="stat-pill" id="studentCount">0 students</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Roll Number</th>
+                  <th>Department</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="studentTbody">
+                <tr><td colspan="4"><div class="empty-state">
+                  <div class="empty-icon">🎓</div>
+                  <p>No students added yet</p>
+                  <small>Use the form above to add students</small>
+                </div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ ALLOCATE PANEL ═══ -->
+      <section class="panel" id="allocatePanel">
+        <div class="section-header">
+          <h2>
+            <div class="icon-circle" style="background:#f0fdf4">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#27ae60"><path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+            </div>
+            Seat Allocation
+          </h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary btn-sm" id="reshuffleBtn">🔀 Reshuffle</button>
+            <button class="btn btn-success" id="allocateBtn">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              Allocate Seats
+            </button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;border-left:4px solid var(--success)">
+          <div class="card-body" style="padding:16px 20px;display:flex;align-items:center;gap:12px">
+            <div style="font-size:1.4rem">🔀</div>
+            <div>
+              <strong style="font-size:.9rem;color:var(--primary)">Fisher-Yates Shuffle Algorithm</strong>
+              <p style="font-size:.78rem;color:var(--text-muted);margin-top:2px">Students are randomly shuffled before seat assignment — ensuring no two students from the same batch sit together, preventing malpractice effectively.</p>
+            </div>
+            <div class="stat-pill" style="margin-left:auto;flex-shrink:0" id="allocatedCount">0 seats</div>
+          </div>
+        </div>
+
+        <div class="seat-grid" id="seatGrid">
+          <div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-icon">💺</div>
+            <p>No allocation done yet</p>
+            <small>Click "Allocate Seats" to randomise seating.</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ COLLECTION PANEL ═══ -->
+      <section class="panel" id="collectionPanel">
+        <div class="section-header">
+          <h2>
+            <div class="icon-circle" style="background:#fdf4ff">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#8e44ad"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            Collection Sheet
+          </h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary btn-sm" id="printBtn">🖨️ Print</button>
+            <button class="btn btn-primary" id="genCollectionBtn">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              Generate Sheet
+            </button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;border-left:4px solid #8e44ad">
+          <div class="card-body" style="padding:16px 20px;display:flex;align-items:center;gap:12px">
+            <div style="font-size:1.4rem">📋</div>
+            <div>
+              <strong style="font-size:.9rem;color:var(--primary)">Sorted by Roll Number</strong>
+              <p style="font-size:.78rem;color:var(--text-muted);margin-top:2px">Uses locale-aware numeric comparison to sort roll numbers correctly. This sheet is for administrative reference — different from the randomised seating arrangement.</p>
+            </div>
+            <div class="stat-pill" style="margin-left:auto;flex-shrink:0" id="collectionCount">0 records</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--primary)" stroke-width="2"><path d="M9 12h6m-6 4h6M5 8h14M5 4h14"/></svg>
+            <h3>Student Collection List – Sorted by Roll Number</h3>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Roll Number</th>
+                  <th>Department</th>
+                </tr>
+              </thead>
+              <tbody id="collectionTbody">
+                <tr><td colspan="3"><div class="empty-state">
+                  <div class="empty-icon">📋</div>
+                  <p>No collection sheet generated yet</p>
+                  <small>Click "Generate Sheet" to create sorted list</small>
+                </div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ RESET PANEL ═══ -->
+      <section class="panel" id="resetPanel">
+        <div class="section-header">
+          <h2>
+            <div class="icon-circle" style="background:#fff0f0">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#e74c3c"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </div>
+            Reset Data
+          </h2>
+        </div>
+
+        <div style="display:grid;gap:20px;max-width:640px">
+          <div class="card" style="border-left:4px solid var(--warning)">
+            <div class="card-body">
+              <h3 style="color:var(--primary);margin-bottom:8px;font-size:1rem">🗑️ Reset Student List</h3>
+              <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;line-height:1.6">This will remove all student records and clear seat allocations. Use this to start a new exam session with a fresh student list.</p>
+              <button class="btn btn-warning" id="resetStudentsBtn">Reset Student List</button>
+            </div>
+          </div>
+          <div class="card" style="border-left:4px solid var(--danger)">
+            <div class="card-body">
+              <h3 style="color:var(--primary);margin-bottom:8px;font-size:1rem">🔴 Reset All Data</h3>
+              <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;line-height:1.6">This will clear everything including student records, seat allocations, and all saved state. This action <strong>cannot be undone</strong>.</p>
+              <button class="btn btn-danger" id="resetAllBtn">Reset All Data</button>
+            </div>
+          </div>
+          <div class="card" style="border-left:4px solid var(--accent)">
+            <div class="card-body" style="display:flex;align-items:center;gap:12px">
+              <div style="font-size:1.4rem">ℹ️</div>
+              <div style="font-size:.83rem;color:var(--text-muted);line-height:1.6">All data is stored in your browser's <strong>localStorage</strong>. Data persists between sessions until you explicitly reset it. Clearing browser data will also remove saved records.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
